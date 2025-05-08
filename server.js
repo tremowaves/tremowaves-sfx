@@ -4,13 +4,16 @@ const expressStaticGzip = require('express-static-gzip');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Enable compression
 app.use(compression());
 
-// Serve static files with gzip compression
-app.use(expressStaticGzip('dist', {
+// Serve static files from root directory
+app.use(express.static(__dirname));
+
+// Serve compressed files from dist directory
+app.use('/dist', expressStaticGzip('dist', {
   enableBrotli: true,
   orderPreference: ['br', 'gz'],
   serveStatic: {
