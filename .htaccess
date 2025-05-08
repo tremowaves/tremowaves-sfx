@@ -31,6 +31,9 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Redirect /sfxman to /app/sfxman internally
+RewriteRule ^sfxman/?(.*)$ /app/sfxman/$1 [L]
+
 # Handle Node.js
 RewriteEngine On
 RewriteRule ^$ http://127.0.0.1:4000/ [P,L]
