@@ -4,7 +4,21 @@ const expressStaticGzip = require('express-static-gzip');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+// Trust proxy - important for HTTPS
+app.enable('trust proxy');
+
+// Force HTTPS
+app.use((req, res, next) => {
+  if (req.secure) {
+    next();
+  } else {
+    res.redirect('https://' + req.headers.host + req.url);
+  }
+});
+
+// Use the port provided by Namecheap environment
+const PORT = process.env.PORT || 4000;
 
 // Set production mode
 process.env.NODE_ENV = 'production';
@@ -40,4 +54,5 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Node environment: ${process.env.NODE_ENV}`);
   console.log(`Server running on port ${PORT}`);
+  console.log(`Access your app at https://tremowaves.com/our-app/sfxman`);
 }); 
