@@ -54,5 +54,5 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Node environment: ${process.env.NODE_ENV}`);
   console.log(`Server running on port ${PORT}`);
-  console.log(`Access your app at https://tremowaves.com/app/sfxman`);
+  console.log(`Access your app at https://tremowaves.com/our-app/sfxman`);
 }); 
