@@ -1,3 +1,6 @@
+# Disable rewrite engine
+RewriteEngine off
+
 # Passenger configuration
 PassengerNodejs /opt/cpanel/ea-nodejs18/bin/node
 PassengerAppType node
