@@ -9,6 +9,7 @@
     AddOutputFilterByType DEFLATE application/rss+xml
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
 </IfModule>
 
 # Enable caching
@@ -56,16 +57,31 @@ PassengerAppType node
 PassengerStartupFile app.js
 PassengerAppRoot /home/username/tremowaves-sfx
 
+# Basic directory access
+<Directory "/home/username/tremowaves-sfx">
+    Options FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
+
 # Environment variables
 <IfModule mod_env.c>
     SetEnv NODE_ENV production
     SetEnv PORT 3000
 </IfModule>
 
-# Handle routing for /sfxman
+# Enable rewrite engine
 RewriteBase /
+
+# Allow access to static files
+<FilesMatch "\.(js|css|jpg|jpeg|png|gif|ico|html|woff|woff2|ttf|svg|eot)$">
+    Require all granted
+</FilesMatch>
+
+# Handle routing for application
+RewriteRule ^$ app/sfxman/ [L]
 RewriteRule ^sfxman/?$ app/sfxman/ [L]
-RewriteRule ^app/sfxman/(.*)$ $1 [L]
+RewriteRule ^sfxman/(.*)$ app/sfxman/$1 [L]
 
 # Caching and compression
 <IfModule mod_expires.c>
@@ -83,4 +99,14 @@ RewriteRule ^app/sfxman/(.*)$ $1 [L]
     AddOutputFilterByType DEFLATE text/css
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Set security headers but allow access
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set Connection keep-alive
+    Header set Access-Control-Allow-Origin "*"
 </IfModule> 

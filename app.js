@@ -36,14 +36,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Base path for production
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/app/sfxman' : '';
+
 // Serve static files from root directory with caching
-app.use(express.static(__dirname, {
+app.use(BASE_PATH, express.static(__dirname, {
   maxAge: '1y',
   etag: true
 }));
 
 // Serve compressed files from dist directory
-app.use('/dist', expressStaticGzip('dist', {
+app.use(BASE_PATH + '/dist', expressStaticGzip('dist', {
   enableBrotli: true,
   orderPreference: ['br', 'gz'],
   serveStatic: {
@@ -53,13 +56,28 @@ app.use('/dist', expressStaticGzip('dist', {
 }));
 
 // Main routes
-app.get(['/', '/sfxman', '/app/sfxman'], (req, res) => {
+app.get([
+  '/',
+  '/sfxman',
+  '/sfxman/*',
+  '/app/sfxman',
+  '/app/sfxman/*'
+], (req, res) => {
+  // Log the request path for debugging
+  console.log('Request path:', req.path);
+  console.log('Base URL:', req.baseUrl);
+  console.log('Original URL:', req.originalUrl);
+  
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API routes if any
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+app.get(BASE_PATH + '/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok',
+    env: process.env.NODE_ENV,
+    base_path: BASE_PATH
+  });
 });
 
 // Cache control headers
@@ -76,6 +94,7 @@ app.use((err, req, res, next) => {
 
 // Handle 404
 app.use((req, res) => {
+  console.log('404 for path:', req.path);
   res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
@@ -85,7 +104,8 @@ app.listen(SERVER_CONFIG.port, SERVER_CONFIG.hostname, () => {
   console.log(`- Environment: ${process.env.NODE_ENV}`);
   console.log(`- Host: ${SERVER_CONFIG.hostname}`);
   console.log(`- Port: ${SERVER_CONFIG.port}`);
-  console.log(`- Base URL: ${process.env.NODE_ENV === 'production' ? '/app/sfxman' : '/'}`);
+  console.log(`- Base Path: ${BASE_PATH}`);
+  console.log(`- Full URL: http${process.env.NODE_ENV === 'production' ? 's' : ''}://${SERVER_CONFIG.hostname}:${SERVER_CONFIG.port}${BASE_PATH}`);
   console.log(`- Apache Version: 2.4.63`);
   console.log(`- Architecture: x86_64`);
   console.log(`- OS: Linux`);
