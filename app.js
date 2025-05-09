@@ -2,10 +2,28 @@ const express = require('express');
 const compression = require('compression');
 const expressStaticGzip = require('express-static-gzip');
 const path = require('path');
+
 const app = express();
 
-// Trust proxy - important for HTTPS behind Apache
+// Trust proxy - important for HTTPS
 app.enable('trust proxy');
+
+// Force HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.secure) {
+      next();
+    } else {
+      res.redirect('https://' + req.headers.host + req.url);
+    }
+  });
+}
+
+// Use the port provided by Namecheap environment
+const PORT = process.env.PORT || 4000;
+
+// Set production mode
+process.env.NODE_ENV = 'production';
 
 // Enable compression
 app.use(compression());
@@ -26,7 +44,13 @@ app.use('/dist', expressStaticGzip(path.join(__dirname, 'dist'), {
   }
 }));
 
-// Main route
+// Cache control headers
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'public, max-age=31536000');
+  next();
+});
+
+// Main route - should be after static files
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -37,14 +61,16 @@ app.use((err, req, res, next) => {
   res.status(500).send('Internal Server Error');
 });
 
-// Start server
-const port = process.env.PORT || 3000;
-const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-
-app.listen(port, hostname, () => {
-  console.log(`Server Information:`);
-  console.log(`- Environment: ${process.env.NODE_ENV}`);
+// Log when server starts
+const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+app.listen(PORT, hostname, () => {
+  console.log('\nServer Information:');
+  console.log(`- Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`- Host: ${hostname}`);
-  console.log(`- Port: ${port}`);
-  console.log(`- URL: https://tremowaves.com/app/sfxman`);
-});
+  console.log(`- Port: ${PORT}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`- Production URL: https://tremowaves.com/app/sfxman`);
+  } else {
+    console.log(`- Local URL: http://${hostname}:${PORT}`);
+  }
+}); 
