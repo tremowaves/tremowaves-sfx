@@ -2,7 +2,7 @@
   "name": "tremowaves-sfx",
   "version": "1.0.0",
   "description": "Tremowaves 8-bit sound effects generator based on sfxr",
-  "main": "sfxr.js",
+  "main": "app.js",
   "exports": [
     "./sfxr.js",
     "./riffwave.js"
@@ -46,7 +46,9 @@
     "serve": "live-server --port=8080 --no-browser",
     "test": "./tests.js",
     "build": "terser sfxr.js -o dist/sfxr.min.js && terser riffwave.js -o dist/riffwave.min.js",
-    "start": "node server.js"
+    "start": "node app.js",
+    "setup": "mkdir -p logs tmp && touch tmp/restart.txt",
+    "production": "NODE_ENV=production node app.js"
   },
   "files": [
     "sfxr.js",

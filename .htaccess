@@ -58,4 +58,38 @@ RewriteEngine On
 RewriteRule ^$ http://127.0.0.1:4000/ [P,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L] 
+RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L]
+
+PassengerNodejs /opt/cpanel/ea-nodejs18/bin/node
+PassengerAppType node
+PassengerStartupFile app.js
+PassengerAppRoot /home/username/tremowaves-sfx
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+</IfModule>
+
+<IfModule mod_env.c>
+    SetEnv NODE_ENV production
+    SetEnv PORT 3000
+</IfModule>
+
+# Caching and compression
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule> 
