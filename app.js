@@ -11,19 +11,13 @@ app.enable('trust proxy');
 // Force HTTPS in production
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
-    if (req.secure) {
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
       next();
     } else {
       res.redirect('https://' + req.headers.host + req.url);
     }
   });
 }
-
-// Use the port provided by Namecheap environment
-const PORT = process.env.PORT || 4000;
-
-// Set production mode
-process.env.NODE_ENV = 'production';
 
 // Enable compression
 app.use(compression());
@@ -61,16 +55,18 @@ app.use((err, req, res, next) => {
   res.status(500).send('Internal Server Error');
 });
 
-// Log when server starts
-const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
-app.listen(PORT, hostname, () => {
+// Start server
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
+
+app.listen(PORT, HOST, () => {
   console.log('\nServer Information:');
   console.log(`- Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`- Host: ${hostname}`);
+  console.log(`- Host: ${HOST}`);
   console.log(`- Port: ${PORT}`);
   if (process.env.NODE_ENV === 'production') {
     console.log(`- Production URL: https://tremowaves.com/app/sfxman`);
   } else {
-    console.log(`- Local URL: http://${hostname}:${PORT}`);
+    console.log(`- Local URL: http://${HOST}:${PORT}`);
   }
 }); 
