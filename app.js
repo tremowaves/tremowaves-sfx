@@ -6,7 +6,7 @@ const app = express();
 
 // Server Configuration
 const SERVER_CONFIG = {
-  hostname: process.env.NODE_ENV === 'production' ? '198.54.115.78' : 'localhost',
+  hostname: process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost',
   port: process.env.PORT || 3000,
   isProduction: process.env.NODE_ENV === 'production'
 };
@@ -36,8 +36,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from root directory
-app.use(express.static(__dirname));
+// Serve static files from root directory with caching
+app.use(express.static(__dirname, {
+  maxAge: '1y',
+  etag: true
+}));
 
 // Serve compressed files from dist directory
 app.use('/dist', expressStaticGzip('dist', {
@@ -49,9 +52,14 @@ app.use('/dist', expressStaticGzip('dist', {
   }
 }));
 
-// Serve index.html
-app.get('/', (req, res) => {
+// Main routes
+app.get(['/', '/sfxman', '/app/sfxman'], (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// API routes if any
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
 // Cache control headers
@@ -60,10 +68,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Error handling with server info
+// Error handling
 app.use((err, req, res, next) => {
-  console.error(`Error on server201 (Stellar18): ${err.stack}`);
+  console.error(`Error on ${req.method} ${req.path}: ${err.stack}`);
   res.status(500).send('Internal Server Error');
+});
+
+// Handle 404
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
 // Start server
@@ -72,6 +85,7 @@ app.listen(SERVER_CONFIG.port, SERVER_CONFIG.hostname, () => {
   console.log(`- Environment: ${process.env.NODE_ENV}`);
   console.log(`- Host: ${SERVER_CONFIG.hostname}`);
   console.log(`- Port: ${SERVER_CONFIG.port}`);
+  console.log(`- Base URL: ${process.env.NODE_ENV === 'production' ? '/app/sfxman' : '/'}`);
   console.log(`- Apache Version: 2.4.63`);
   console.log(`- Architecture: x86_64`);
   console.log(`- OS: Linux`);

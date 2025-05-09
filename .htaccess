@@ -50,31 +50,22 @@ Options -Indexes
 # Handle 404 errors
 ErrorDocument 404 /404.html
 
-# Redirect /sfxman to /app/sfxman internally
-RewriteRule ^sfxman/?(.*)$ /app/sfxman/$1 [L]
-
-# Handle Node.js
-RewriteEngine On
-RewriteRule ^$ http://127.0.0.1:4000/ [P,L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L]
-
+# Passenger configuration
 PassengerNodejs /opt/cpanel/ea-nodejs18/bin/node
 PassengerAppType node
 PassengerStartupFile app.js
 PassengerAppRoot /home/username/tremowaves-sfx
 
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{HTTPS} !=on
-    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
-</IfModule>
-
+# Environment variables
 <IfModule mod_env.c>
     SetEnv NODE_ENV production
     SetEnv PORT 3000
 </IfModule>
+
+# Handle routing for /sfxman
+RewriteBase /
+RewriteRule ^sfxman/?$ app/sfxman/ [L]
+RewriteRule ^app/sfxman/(.*)$ $1 [L]
 
 # Caching and compression
 <IfModule mod_expires.c>
