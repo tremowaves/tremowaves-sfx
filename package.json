@@ -40,15 +40,29 @@
   },
   "devDependencies": {
     "live-server": "^1.2.1",
-    "tape": "5.6.1"
+    "tape": "5.6.1",
+    "nyc": "^15.1.0",
+    "eslint": "^8.56.0",
+    "postcss": "^8.4.35",
+    "postcss-cli": "^11.0.0",
+    "autoprefixer": "^10.4.17",
+    "cssnano": "^6.0.4",
+    "rimraf": "^5.0.5"
   },
   "scripts": {
     "serve": "live-server --port=8080 --no-browser",
-    "test": "./tests.js",
-    "build": "terser sfxr.js -o dist/sfxr.min.js && terser riffwave.js -o dist/riffwave.min.js",
-    "start": "node server.js",
+    "test": "tape tests/*.js",
+    "test:coverage": "nyc tape tests/*.js",
+    "build": "npm run build:js && npm run build:css",
+    "build:js": "terser sfxr.js -o dist/sfxr.min.js --source-map --compress --mangle && terser riffwave.js -o dist/riffwave.min.js --source-map --compress --mangle",
+    "build:css": "postcss public/css/*.css -d dist/css",
+    "start": "node app.js",
     "setup": "mkdir -p logs tmp && touch tmp/restart.txt",
-    "production": "NODE_ENV=production node server.js"
+    "production": "NODE_ENV=production node app.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "clean": "rimraf dist/*",
+    "prebuild": "npm run clean"
   },
   "files": [
     "sfxr.js",
