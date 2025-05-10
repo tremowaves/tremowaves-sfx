@@ -4,6 +4,7 @@ const expressStaticGzip = require('express-static-gzip');
 const path = require('path');
 
 const app = express();
+const BASE_PATH = '/app/sfxman';
 
 // Trust proxy - important for HTTPS
 app.enable('trust proxy');
@@ -22,11 +23,11 @@ const PORT = process.env.PORT || 4000;
 // Enable compression
 app.use(compression());
 
-// Serve static files from root directory
-app.use(express.static(__dirname));
+// Serve static files from root directory with base path
+app.use(BASE_PATH, express.static(__dirname));
 
 // Serve compressed files from dist directory
-app.use('/dist', expressStaticGzip('dist', {
+app.use(BASE_PATH + '/dist', expressStaticGzip('dist', {
   enableBrotli: true,
   orderPreference: ['br', 'gz'],
   serveStatic: {
@@ -35,9 +36,19 @@ app.use('/dist', expressStaticGzip('dist', {
   }
 }));
 
-// Serve index.html
-app.get('/', (req, res) => {
+// Serve index.html for the base path
+app.get(BASE_PATH, (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve index.html for the root path
+app.get(BASE_PATH + '/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Handle all other routes
+app.get('*', (req, res) => {
+  res.redirect(BASE_PATH);
 });
 
 // Cache control headers
@@ -46,7 +57,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Access your app at https://tremowaves.com/our-app/sfxman`);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Access your app at https://tremowaves.com${BASE_PATH}`);
+  });
+}
+
+// Export the app for Passenger
+module.exports = app;

@@ -69,4 +69,7 @@ app.listen(PORT, HOST, () => {
   } else {
     console.log(`- Local URL: http://${HOST}:${PORT}`);
   }
-}); 
+});
+
+// Export the app for Passenger
+module.exports = app; 

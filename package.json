@@ -46,9 +46,9 @@
     "serve": "live-server --port=8080 --no-browser",
     "test": "./tests.js",
     "build": "terser sfxr.js -o dist/sfxr.min.js && terser riffwave.js -o dist/riffwave.min.js",
-    "start": "node app.js",
+    "start": "node server.js",
     "setup": "mkdir -p logs tmp && touch tmp/restart.txt",
-    "production": "NODE_ENV=production node app.js"
+    "production": "NODE_ENV=production node server.js"
   },
   "files": [
     "sfxr.js",
