@@ -1,30 +1,29 @@
-# Disable rewrite engine
-RewriteEngine off
-
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/fairiagt/tremowaves.com/our-app/sfxman"
+PassengerBaseURI "/our-app/sfxman"
+PassengerNodejs "/home/fairiagt/nodevenv/tremowaves.com/our-app/sfxman/18/bin/node"
+PassengerAppType node
+PassengerStartupFile server.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+# Enable rewrite engine
+RewriteEngine On
 # Passenger configuration
 PassengerNodejs /opt/cpanel/ea-nodejs18/bin/node
 PassengerAppType node
 PassengerStartupFile app.js
-PassengerAppRoot /home/username/app/sfxman
-
+PassengerAppRoot /home/fairiagt/tremowaves.com/our-app/sfxman
 # Environment variables
 <IfModule mod_env.c>
     SetEnv NODE_ENV production
-    SetEnv PORT 3000
+    SetEnv PORT 4000
     SetEnv HOST 127.0.0.1
 </IfModule>
-
-# Enable rewrite engine
-RewriteEngine On
-
 # Redirect to HTTPS
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
 # Handle /app/sfxman routing
 RewriteRule ^app/sfxman$ app/sfxman/ [R=301,L]
 RewriteRule ^app/sfxman/(.*)$ app/sfxman/$1 [L]
-
 # Security headers
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
@@ -32,7 +31,6 @@ RewriteRule ^app/sfxman/(.*)$ app/sfxman/$1 [L]
     Header set X-XSS-Protection "1; mode=block"
     Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
-
 # Enable compression
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/plain
@@ -41,7 +39,6 @@ RewriteRule ^app/sfxman/(.*)$ app/sfxman/$1 [L]
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/json
 </IfModule>
-
 # Enable caching
 <IfModule mod_expires.c>
     ExpiresActive On
@@ -50,31 +47,16 @@ RewriteRule ^app/sfxman/(.*)$ app/sfxman/$1 [L]
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
-    ExpiresByType application/x-javascript "access plus 1 month"
     ExpiresByType text/html "access plus 1 month"
     ExpiresByType application/xhtml+xml "access plus 1 month"
 </IfModule>
-
 # Enable Keep-Alive
 <IfModule mod_headers.c>
     Header set Connection keep-alive
 </IfModule>
-
-# Redirect to HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
 # Redirect /sfxman to /app/sfxman internally
 RewriteRule ^sfxman/?(.*)$ /app/sfxman/$1 [L]
-
 # Handle Node.js
-RewriteEngine On
-RewriteRule ^$ http://127.0.0.1:4000/ [P,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ http://127.0.0.1:4000/$1 [P,L]
